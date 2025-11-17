@@ -37,7 +37,15 @@ def clone(repo_owner, repo_name, prompt=False, target_dir=None):
     if prompt:
         prompt_rmdir_warning(target)
     rmdir(target)
-    url = 'git@github.com:%s/%s' % (repo_owner, repo_name)
+    if '://' in repo_name:
+        url = repo_name.rstrip('/')
+        if not url.endswith('.git'):
+            url += '.git'
+    else:
+        repo = repo_name.rstrip('/')
+        if repo.endswith('.git'):
+            repo = repo[:-4]
+        url = 'https://github.com/%s/%s.git' % (repo_owner, repo)
     _, err, r = run_command("git clone %s %s" % (url, target), os.getcwd())
     if r!= 0:
         print('[*] Failed to clone: "%s"' % url)
