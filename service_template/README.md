@@ -37,7 +37,7 @@ Docker container.
     RUN cd /src; make
     WORKDIR /src
 
-    RUN echo "echo_service 4000/tcp" >> /etc/services
+    RUN echo "echo_service 5000/tcp" >> /etc/services
 
     RUN service xinetd restart
     ENTRYPOINT [ "xinetd", "-dontfork" ]
@@ -55,7 +55,7 @@ Docker container.
         user = root
         server = /src/echo
         disable = no
-        port = 4000
+        port = 5000
     }
     ```
 
@@ -98,8 +98,8 @@ Docker container.
     ```
 
 4. Finally, you run the [gitctf script](../scripts): `./gitctf.py exec service
-   --service-dir [DIR] --service-name SrvName --host-port 4000 --service-port
-   4000` in order to run your echo service in a Docker container. The service
-   will listen on port 4000 of the host machine. Assuming the service port is
-   4000, you can simply run your service with `./gitctf.py exec service
+   --service-dir [DIR] --service-name SrvName --host-port 5000 --service-port
+   5000` in order to run your echo service in a Docker container. The service
+   will listen on port 5000 of the host machine. Assuming the service port is
+   5000, you can simply run your service with `./gitctf.py exec service
    --service-dir [DIR] --service-name SrvName`.

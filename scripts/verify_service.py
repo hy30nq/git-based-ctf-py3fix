@@ -37,11 +37,21 @@ def setup(repo_name, container_name, service_port, host_port):
         sys.exit()
 
 def check_liveness(container_name, host_port):
-    _, _, e = run_command('nc -z 127.0.0.1 %d' % host_port, None)
-    if e != 0:
-        print("[*] %s service is not running." % container_name)
-    else:
-        print("[*] %s service looks well." % container_name)
+    import time
+    max_retries = 30
+    retry_interval = 1
+    
+    for i in range(max_retries):
+        _, _, e = run_command('nc -z 127.0.0.1 %d' % host_port, None)
+        if e == 0:
+            print("[*] %s service looks well." % container_name)
+            return True
+        time.sleep(retry_interval)
+        if (i + 1) % 5 == 0:
+            print("[*] Waiting for %s service to be ready... (%d/%d)" % (container_name, i + 1, max_retries))
+    
+    print("[*] %s service is not running after %d seconds." % (container_name, max_retries * retry_interval))
+    return False
 
 def verify_service(team, branch, service_port, host_port, config_file):
     config = load_config(config_file)
@@ -52,7 +62,8 @@ def verify_service(team, branch, service_port, host_port, config_file):
     docker_cleanup(container_name)
     checkout(repo_name, branch)
     setup(repo_name, container_name, int(service_port), int(host_port))
-    check_liveness(container_name, int(host_port))
+    if not check_liveness(container_name, int(host_port)):
+        sys.exit(1)
     docker_cleanup(container_name)
     rmdir(repo_name)
     sys.exit()
