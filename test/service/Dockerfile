@@ -6,8 +6,7 @@ FROM --platform=linux/amd64 debian:latest
 
 # ======================================
 # Install dependencies
-RUN sed -i 's/deb.debian.org/ftp.daumkakao.com/g' /etc/apt/sources.list && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         python3 \
         python3-pip \
@@ -21,6 +20,7 @@ COPY flag /var/ctf/
 WORKDIR /srv/app
 
 COPY requirements.txt .
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY app/ /srv/app

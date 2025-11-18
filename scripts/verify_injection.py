@@ -46,7 +46,19 @@ def verify_injection(team, config_file):
     repo_name = config['teams'][team]['repo_name']
     clone(repo_owner, repo_name)
     branches = list_branches(repo_name)
-    branches.remove("master") # master branch is not verification target
+    
+    # Find main branch (master or main)
+    main_branch = None
+    if "master" in branches:
+        main_branch = "master"
+        branches.remove("master") # master branch is not verification target
+    elif "main" in branches:
+        main_branch = "main"
+        branches.remove("main") # main branch is not verification target
+    
+    if main_branch is None:
+        print("[*] No main/master branch found. Available branches:", branches)
+        sys.exit()
 
     for branch in branches:
         checkout(repo_name, branch)
@@ -54,9 +66,9 @@ def verify_injection(team, config_file):
         bug_branch_result, _ = \
             verify_exploit(exploit_dir, repo_name, branch, timeout, config)
 
-        checkout(repo_name, "master")
+        checkout(repo_name, main_branch)
         master_result, _ = \
-            verify_exploit(exploit_dir, repo_name, "master", timeout, config)
+            verify_exploit(exploit_dir, repo_name, main_branch, timeout, config)
 
         rmdir(exploit_dir)
 
@@ -64,7 +76,7 @@ def verify_injection(team, config_file):
             print ('[*] Successflly verified branch "%s".' % branch)
         elif bug_branch_result == True :
             print ('[*] Exploit for branch "%s" works, but it also works on ' \
-                   'master branch, which indicates some error.' %  branch)
+                   '%s branch, which indicates some error.' %  (branch, main_branch))
             sys.exit()
         else :
             print ('[*] Failed to verify exploit in branch "%s".' %  branch)

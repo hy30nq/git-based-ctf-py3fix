@@ -17,7 +17,7 @@
             "repo_name": "test-for-git",
             "pub_key_id": "9CB5E420",
             "bug1": "TODO_SOLO_BUG1",
-            "bug2": "TODO_SOLO_BUG2",
+            "bug2": "55ebb98916cad1903b10b66e70ee8093a2491a1b",
             "bug3": "TODO_SOLO_BUG3"
         }
     },
@@ -28,4 +28,3 @@
         }
     }
 }
-

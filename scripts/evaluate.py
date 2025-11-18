@@ -74,13 +74,31 @@ def get_issues(target_repos, github):
     try:
         notifications, interval = github.poll(query)
     except ConnectionError:
+        print('[*] Connection error when polling notifications')
         return [], 60
+    except Exception as e:
+        print('[*] Error when polling notifications: %s' % str(e))
+        return [], 60
+    
+    print('[*] Received %d notifications' % len(notifications))
+    print('[*] Target repos: %s' % str(target_repos))
+    
     for noti in reversed(notifications):
-        if noti['unread'] and is_issue(noti) and is_target(noti, target_repos):
+        repo_name = noti['repository']['name']
+        is_unread = noti['unread']
+        is_issue_type = is_issue(noti)
+        is_target_repo = is_target(noti, target_repos)
+        
+        print('[*] Notification: repo=%s, unread=%s, type=%s, is_target=%s' % 
+              (repo_name, is_unread, noti['subject']['type'], is_target_repo))
+        
+        if is_unread and is_issue_type and is_target_repo:
             num = get_issue_number(noti)
             id = get_issue_id(noti)
             gen_time = get_issue_gen_time(noti)
-            issues.append((noti['repository']['name'], num, id, gen_time))
+            issues.append((repo_name, num, id, gen_time))
+            print('[*] Added issue: repo=%s, num=%d, id=%s' % (repo_name, num, id))
+    
     return issues, interval
 
 def mark_as_read(issue_id, github):
@@ -275,8 +293,9 @@ def start_eval(config, github):
     return
 
 def evaluate(config_file, token):
-    importlib.reload(sys)
-    sys.setdefaultencoding('utf-8')
+    # Python 3 uses UTF-8 by default, no need for setdefaultencoding
+    # sys.setdefaultencoding('utf-8')  # Python 2 only, removed in Python 3
+    # importlib.reload(sys)  # Not needed in Python 3
     config = load_config(config_file)
     github = Github(config['player'], token)
     return start_eval(config, github)

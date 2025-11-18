@@ -78,8 +78,15 @@ def encrypt_exploit(exploit_dir, target_team, config, signer=None):
 
     # Retrieve information from config
     teams = config["teams"]
-    instructor_pubkey = teams["instructor"]["pub_key_id"]
     target_pubkey = teams[target_team]['pub_key_id']
+    
+    # Try to get instructor pubkey, use target_pubkey if not available
+    instructor_pubkey = None
+    if "instructor" in teams:
+        instructor_pubkey = teams["instructor"]["pub_key_id"]
+    else:
+        # If no instructor, use target team's pubkey (for self-encryption)
+        instructor_pubkey = target_pubkey
 
     # Zip the directory
     tmp_path = "/tmp/gitctf_%s" % random_string(6)
@@ -87,12 +94,16 @@ def encrypt_exploit(exploit_dir, target_team, config, signer=None):
     zip_file = tmp_path + ".zip" # make_archive() automatically appends suffix.
 
     # Encrypt the zipped file
-
     encrypt_cmd = "gpg -o %s " % out_file
     if signer is not None:
         signer_pubkey = config["individual"][signer]['pub_key_id']
         encrypt_cmd += "--default-key %s --sign " % signer_pubkey
-    encrypt_cmd += "-e -r %s -r %s " % (instructor_pubkey, target_pubkey)
+    
+    # Use both instructor and target pubkeys if different, otherwise just one
+    if instructor_pubkey != target_pubkey:
+        encrypt_cmd += "-e -r %s -r %s " % (instructor_pubkey, target_pubkey)
+    else:
+        encrypt_cmd += "-e -r %s " % target_pubkey
     encrypt_cmd += "--armor %s" % zip_file
     _, err, ret = run_command(encrypt_cmd, None)
     rmfile(zip_file) # Clean up zip file.
