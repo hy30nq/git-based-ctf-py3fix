@@ -45,16 +45,34 @@ def decrypt_exploit(encrypted_exploit_path, config, team, out_dir=None, \
     if expected_signer == None:
         decrypt_cmd = 'gpg -o %s %s' % (tmpzip, encrypted_exploit_path)
     else:
-        instructor_id = config['teams']['instructor']['pub_key_id']
         team_id = config['teams'][team]['pub_key_id']
-        expected_signer_id = config['individual'][expected_signer]['pub_key_id']
+        
+        # Try to get signer's pubkey from individual config, skip if not found
+        expected_signer_id = None
+        if expected_signer in config.get('individual', {}):
+            expected_signer_id = config['individual'][expected_signer]['pub_key_id']
+        
+        # Try to get instructor pubkey, skip if not available
+        instructor_id = None
+        if "instructor" in config['teams']:
+            instructor_id = config['teams']['instructor']['pub_key_id']
 
-        # Make keyring
-        run_command("gpg -o %s --export %s %s %s" % (tmpgpg, \
-                expected_signer_id, instructor_id, team_id), os.getcwd())
-
-        decrypt_cmd = "gpg --no-default-keyring --keyring %s -o %s %s" \
-                % (tmpgpg, tmpzip, encrypted_exploit_path)
+        # Make keyring with available keys
+        keys_to_export = []
+        if expected_signer_id is not None:
+            keys_to_export.append(expected_signer_id)
+        if instructor_id is not None:
+            keys_to_export.append(instructor_id)
+        keys_to_export.append(team_id)
+        
+        if len(keys_to_export) > 0:
+            keys_str = " ".join(keys_to_export)
+            run_command("gpg -o %s --export %s" % (tmpgpg, keys_str), os.getcwd())
+            decrypt_cmd = "gpg --no-default-keyring --keyring %s -o %s %s" \
+                    % (tmpgpg, tmpzip, encrypted_exploit_path)
+        else:
+            # If no keys found, try without keyring (may work if keys are in default keyring)
+            decrypt_cmd = 'gpg -o %s %s' % (tmpzip, encrypted_exploit_path)
 
     _, err, r = run_command(decrypt_cmd, os.getcwd())
     if r != 0:
