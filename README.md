@@ -177,7 +177,7 @@ students before a CTF begins. You can check out an [example configuration file](
     1. `pub_key_id`: The public key ID of the individual.
     1. `team`: Which team does this individual belong to?
 
-# Authors
+# GitCTF Origin Authors
 
 This research project has been conducted by [SoftSec Lab](https://softsec.kaist.ac.kr) at KAIST.
 
@@ -187,7 +187,7 @@ This research project has been conducted by [SoftSec Lab](https://softsec.kaist.
 
 # Citing Git-based CTF
 
-To cite our paper:
+To cite paper:
 ```
 @INPROCEEDINGS{wi:usenixase:2018,
     author = {SeongIl Wi and Jaeseung Choi and Sang Kil Cha},

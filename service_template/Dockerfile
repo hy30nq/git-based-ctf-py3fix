@@ -22,14 +22,11 @@
 
 FROM --platform=linux/amd64 i386/debian:latest
 
-# ======================================
 # Install your package here
 RUN sed -i 's/deb.debian.org/ftp.daumkakao.com/g' /etc/apt/sources.list
-# ======================================
+
 
 RUN mkdir -p /var/ctf
 COPY flag /var/ctf/
 
-# ======================================
 # Build and run your service here
-# ======================================

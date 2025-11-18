@@ -4,8 +4,7 @@ A Dockerfile template for preparing a Git-based CTF service.
 
 # Usage
 
-You are free to modify the [`Dockerfile`](Dockerfile), but remember to not touch
-the base image, and to `COPY` the flag file into the `/var/ctf` directory. The
+You are free to modify the [`Dockerfile`](Dockerfile), **but remember to `COPY` the flag file into the `/var/ctf` directory**. The
 `flag` file can be filled with a random string. This file is used to prove the
 exploitability of an attack against your service. You can run your service in a
 Docker container with `gitctf.py`.
